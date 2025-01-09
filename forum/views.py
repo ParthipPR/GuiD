@@ -100,3 +100,8 @@ def delete_question(request, question_id):
         return JsonResponse({'success': True, 'message': 'Question deleted successfully.'})
     else:
         return JsonResponse({'success': False, 'message': 'You are not authorized to delete this question.'}, status=403)
+
+def chat_room(request, room_name):
+    return render(request, 'forum/chat.html', {
+        'room_name': room_name
+    })

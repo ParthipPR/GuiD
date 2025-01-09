@@ -8,5 +8,6 @@ urlpatterns = [
     path('question/<int:question_id>/upvote/<int:answer_id>/', views.upvote_answer, name='upvote'),
     path('delete_answer/<int:answer_id>/', views.delete_answer, name='delete_answer'),
     path('question/<int:question_id>/delete/', views.delete_question, name='delete_question'),
+    path('chat/<str:room_name>/', views.chat_room, name='chat_room'),
 ]
 
