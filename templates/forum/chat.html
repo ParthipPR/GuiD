@@ -238,7 +238,19 @@
         </div>
         
         <div id="messages" class="messages-container">
-            <!-- Messages will be inserted here -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="message-container {% if message.author == request.user %}user{% else %}other{% endif %}">
+                        <div class="message-metadata">
+                            <span class="message-username">{{ message.author.username }}</span>
+                            <span class="message-timestamp">{{ message.timestamp|time:"H:i" }}</span>
+                        </div>
+                        <div class="message-content">
+                            {{ message.content }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
         </div>
         
         <div class="chat-input-area">
@@ -264,6 +276,11 @@
         `${wsScheme}//${window.location.host}/ws/chat/${roomName}/`
     );
 
+    // Display existing messages on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        scrollToBottom();
+    });
+
     function getCurrentTime() {
         const now = new Date();
         return now.toLocaleTimeString('en-US', { 
@@ -279,7 +296,9 @@
 
     chatSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);
-        appendMessage(data.message, 'other', data.username, data.timestamp);
+        if (data.username !== currentUsername) {
+            appendMessage(data.message, 'other', data.username, data.timestamp);
+        }
     };
 
     chatSocket.onclose = function(e) {
@@ -331,10 +350,14 @@
         
         if (message && chatSocket.readyState === WebSocket.OPEN) {
             const timestamp = getCurrentTime();
+            // Append message locally for sender
             appendMessage(message, 'user', currentUsername, timestamp);
             
+            // Send message through WebSocket
             chatSocket.send(JSON.stringify({
-                'message': message
+                'message': message,
+                'username': currentUsername,
+                'timestamp': timestamp
             }));
             
             input.value = '';
